@@ -12,9 +12,12 @@ void InputManager::StartProgramm(std::ostream& output) {
   std::string image_path;
   size_t height;
   bool reverse;
-  std::cout << "Enter Image Path:   ";
+  bool colored;
+  std::cout << "Enter Image Path: ";
   std::cin >> image_path;
-  Converter converter(image_path, output);
+  std::cout << std::endl << "Is Colored? (0/1): ";
+  std::cin >> colored;
+  Converter converter(image_path, output, colored);
   std::cout << std::endl << "Enter height: ";
   std::cin >> height;
   std::cout << std::endl << "Need reverse? (0/1)";

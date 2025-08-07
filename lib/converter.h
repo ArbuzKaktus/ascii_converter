@@ -10,10 +10,11 @@
 
 class Converter {
 public:
-  Converter(const std::string& path ,std::ostream& output);
+  Converter(const std::string& path ,std::ostream& output, bool colored);
   void convert(size_t height, bool reverse);
 
 private:
   cv::Mat image_;
   std::ostream& output_;
+  bool colored_;
 };
