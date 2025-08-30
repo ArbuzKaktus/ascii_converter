@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
-set(CMAKE_TOOLCHAIN_FILE "C:/Users/yurac/vcpkg/scripts/buildsystems/vcpkg.cmake")
+cmake_minimum_required(VERSION 3.10)
 
 project(AsciConverter LANGUAGES CXX)
 

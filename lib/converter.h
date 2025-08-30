@@ -10,11 +10,11 @@
 class Converter {
 public:
   Converter(const std::string& path, std::ostream& output, bool colored, bool video);
-  void convert(size_t height, bool reverse, int more_brightness, float saturation);
-  void animate(size_t height, bool reverse, int more_brightness, float saturation, double custom_fps = -1);
+  void convert(size_t height, int more_brightness, float saturation);
+  void animate(size_t height, int more_brightness, float saturation, double custom_fps = -1);
 
 private:
-  std::string frameToAscii(const cv::Mat& frame, size_t height, bool reverse, int more_brightness, float saturation);
+  std::string frameToAscii(const cv::Mat& frame, size_t height, int more_brightness, float saturation);
 
   cv::Mat image_;
   cv::VideoCapture video_;

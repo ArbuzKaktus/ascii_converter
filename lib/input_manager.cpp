@@ -17,7 +17,6 @@ void InputManager::StartProgramm(std::ostream& output, int argc, char** argv) {
     std::string file_path;
     size_t height;
     char confirmation;
-    bool reverse;
     bool colored;
     float saturation;
     double fps = -1;
@@ -32,8 +31,6 @@ void InputManager::StartProgramm(std::ostream& output, int argc, char** argv) {
     
     std::cout << "Enter height: ";
     std::cin >> height;
-    std::cout << "Need reverse? (0/1): ";
-    std::cin >> reverse;
     std::cout << "How many brightness add: ";
     std::cin >> more_brightness;
     std::cout << "Saturation koef: ";
@@ -45,9 +42,9 @@ void InputManager::StartProgramm(std::ostream& output, int argc, char** argv) {
       if (fps == 0) fps = -1;
       std::cout << "PLAY? (any symbol): ";
       std::cin >> confirmation;
-      converter.animate(height, reverse, more_brightness, saturation, fps);
+      converter.animate(height, more_brightness, saturation, fps);
     } else {
-      converter.convert(height, reverse, more_brightness, saturation);
+      converter.convert(height, more_brightness, saturation);
     }
   } catch (const std::exception& e) {
     std::cerr << "Error: " << e.what() << std::endl;

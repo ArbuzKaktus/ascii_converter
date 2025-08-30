@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <iostream>
+#include <iterator>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/videoio.hpp>
@@ -17,10 +18,13 @@
 #endif
 
 namespace {
-const std::string kSymbols =
-    " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
-const std::string kReverseSymbols =
-    "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ";
+constexpr char kSymbols[] =
+    {' ', '.', '\'', '`', '^', '\"', ',', ':', ';', 'I', 'l', '!',
+      'i', '>', '<', '~', '+', '_' , '-', '?', ']', '[', '}', '{', '1',
+    ')', '(', '|', '\\', '/', 't', 'f', 'j', 'r', 'x', 'n', 'u', 'v', 
+    'c', 'z', 'X', 'Y', 'U', 'J', 'C', 'L', 'Q', '0', 'O', 'Z', 'm', 'w',
+    'q', 'p', 'd', 'b', 'k', 'h', 'a', 'o', '*', '#', 'M', 'W', '&',
+    '8', '%', 'B', '@', '$'};
 
 constexpr double kDefaultFallbackFps = 25.0;
 constexpr double kAspectRatioCorrection = 2.0;
@@ -102,9 +106,8 @@ cv::Mat increaseSaturation(cv::Mat image, float factor) {
   return image;
 }
 
-std::string Converter::frameToAscii(const cv::Mat& frame, size_t height, bool reverse,
+std::string Converter::frameToAscii(const cv::Mat& frame, size_t height,
                                     int more_brightness, float saturation) {
-  const std::string symbols = reverse ? kReverseSymbols : kSymbols;
 
   if (frame.empty()) {
     std::cerr << "Warning: Empty frame encountered in frameToAscii" << std::endl;
@@ -142,9 +145,9 @@ std::string Converter::frameToAscii(const cv::Mat& frame, size_t height, bool re
         int b = pixel[0];
 
         int brightness = (kBrightnessWeightRed * r + kBrightnessWeightGreen * g + kBrightnessWeightBlue * b) / kBrightnessWeightTotal;
-        size_t index = (brightness * (symbols.size() - 1)) / kMaxBrightness;
+        size_t index = (brightness * (std::size(kSymbols) - 1)) / kMaxBrightness;
 
-        asciiArt += get_ansi_color(r, g, b) + symbols[index];
+        asciiArt += get_ansi_color(r, g, b) + kSymbols[index];
       }
       asciiArt += "\033[0m\n";
     }
@@ -154,8 +157,8 @@ std::string Converter::frameToAscii(const cv::Mat& frame, size_t height, bool re
       row_ptr = resized_image.ptr<uint8_t>(y);
       for (int x = 0; x < resized_image.cols; x++) {
         uint8_t brightness = row_ptr[x];
-        size_t index = (brightness * (symbols.size() - 1)) / kMaxBrightness;
-        asciiArt += symbols[index];
+        size_t index = (brightness * (std::size(kSymbols) - 1)) / kMaxBrightness;
+        asciiArt += kSymbols[index];
       }
       asciiArt += '\n';
     }
@@ -163,7 +166,7 @@ std::string Converter::frameToAscii(const cv::Mat& frame, size_t height, bool re
   return asciiArt;
 }
 
-void Converter::animate(size_t height, bool reverse, int more_brightness,
+void Converter::animate(size_t height, int more_brightness,
                         float saturation, double custom_fps) {
 
   double original_fps = video_.get(cv::CAP_PROP_FPS);
@@ -209,7 +212,7 @@ void Converter::animate(size_t height, bool reverse, int more_brightness,
         }
         
         auto start = std::chrono::steady_clock::now();
-        std::string asciiFrame = frameToAscii(gif_frames_[i].clone(), height, reverse, more_brightness, saturation);
+        std::string asciiFrame = frameToAscii(gif_frames_[i].clone(), height, more_brightness, saturation);
         
         clearAndPosition();
         std::cout << asciiFrame << std::flush;
@@ -255,7 +258,7 @@ void Converter::animate(size_t height, bool reverse, int more_brightness,
     }
     
     auto start = std::chrono::steady_clock::now();
-    std::string asciiFrame = frameToAscii(frame, height, reverse, more_brightness, saturation);
+    std::string asciiFrame = frameToAscii(frame, height, more_brightness, saturation);
     
     clearAndPosition();
     std::cout << asciiFrame << std::flush;
@@ -318,9 +321,8 @@ Converter::Converter(const std::string &path, std::ostream &output,
   }
 }
 
-void Converter::convert(size_t height, bool reverse, int more_brightness,
+void Converter::convert(size_t height, int more_brightness,
                         float saturation) {
-  std::string symbols = reverse ? kReverseSymbols : kSymbols;
   
   if (image_.empty()) {
     std::cerr << "Error: Image is empty, cannot convert" << std::endl;
@@ -346,9 +348,9 @@ void Converter::convert(size_t height, bool reverse, int more_brightness,
         int b = pixel[0];
 
         int brightness = (299 * r + 587 * g + 114 * b) / 1000;
-        size_t index = (brightness * (symbols.size() - 1)) / 255;
+        size_t index = (brightness * (std::size(kSymbols) - 1)) / 255;
 
-        output_ << get_ansi_color(r, g, b) + symbols[index];
+        output_ << get_ansi_color(r, g, b) + kSymbols[index];
       }
       output_ << "\033[0m\n";
     }
@@ -358,8 +360,8 @@ void Converter::convert(size_t height, bool reverse, int more_brightness,
       row_ptr = resized_image.ptr<uint8_t>(y);
       for (int x = 0; x < resized_image.cols; x++) {
         uint8_t brightness = row_ptr[x];
-        size_t index = (brightness * (symbols.size() - 1)) / 255;
-        output_ << symbols[index];
+        size_t index = (brightness * (std::size(kSymbols) - 1)) / 255;
+        output_ << kSymbols[index];
       }
       output_ << '\n';
     }
